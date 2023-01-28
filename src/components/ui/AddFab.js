@@ -1,5 +1,6 @@
 import React, { useContext } from "react";
 import { CalendarContext } from "../context/CalendarContext";
+import "../calendar/modal.css";
 
 export const AddFab = () => {
   const { providerModal } = useContext(CalendarContext);

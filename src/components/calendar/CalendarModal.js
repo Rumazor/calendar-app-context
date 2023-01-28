@@ -36,6 +36,8 @@ export const CalendarModal = () => {
   useEffect(() => {
     if (activeEvent) {
       setFormValues(activeEvent);
+    } else {
+      setFormValues(initEvent);
     }
   }, [activeEvent, setFormValues]);
 
@@ -93,22 +95,29 @@ export const CalendarModal = () => {
     }
     //TODO
 
-    // if (activeEvent) {
-    //   console.log("update Event");
-    // } else {
-    //   return (
-
-    //   );
-    // }
-
-    return (
-      (setCalendarState({
-        ...calendarState,
-        events: [...calendarState.events, newEvent],
-      }),
-      setTitleValit(true)),
-      closeModal()
-    );
+    if (activeEvent) {
+      const eventId = activeEvent.id;
+      const updatedEvents = calendarState.events.map((event) => {
+        if (event.id === eventId) {
+          return { ...event, ...formValues };
+        }
+        return event;
+      });
+      return (
+        setCalendarState({ ...calendarState, events: updatedEvents }),
+        setTitleValit(true),
+        closeModal()
+      );
+    } else {
+      return (
+        (setCalendarState({
+          ...calendarState,
+          events: [...calendarState.events, newEvent],
+        }),
+        setTitleValit(true)),
+        closeModal()
+      );
+    }
   };
 
   return (
@@ -120,7 +129,10 @@ export const CalendarModal = () => {
         className="modal-box md:w-[31.25rem]"
         overlayClassName="modal-fondo"
       >
-        <h1 className="text-2xl font-semibold p-2"> Nuevo evento </h1>
+        <h1 className="text-2xl font-semibold p-2">
+          {" "}
+          {activeEvent ? "Editar evento" : "Nuevo Evento"}{" "}
+        </h1>
         <hr />
         <form onSubmit={handleSubmitForm} className="container">
           <div className="form-group my-2">

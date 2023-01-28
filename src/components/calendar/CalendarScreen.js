@@ -1,4 +1,4 @@
-import React, { useState, useContext, useEffect } from "react";
+import React, { useState, useContext } from "react";
 import { Calendar, momentLocalizer } from "react-big-calendar";
 import moment from "moment";
 import "moment/locale/es";
@@ -9,6 +9,7 @@ import { CalendarModal } from "./CalendarModal";
 import "react-big-calendar/lib/css/react-big-calendar.css";
 import { CalendarContext } from "../context/CalendarContext";
 import { AddFab } from "../ui/AddFab";
+import DeleteEventFab from "../ui/DeleteEventFab";
 moment.locale("es");
 
 const localizer = momentLocalizer(moment);
@@ -19,6 +20,7 @@ export const CalendarScreen = () => {
   const { setModal, modal } = providerModal;
   const { setCalendarState, calendarState } = calendarStateProvider;
 
+  const { activeEvent } = calendarState;
   const [lastView, setLastView] = useState(
     localStorage.getItem("lastView") || "month"
   );
@@ -37,6 +39,13 @@ export const CalendarScreen = () => {
     localStorage.setItem("lastView", e);
   };
 
+  const onSelectSlot = (e) => {
+    console.log(e);
+    setCalendarState({
+      ...calendarState,
+      activeEvent: null,
+    });
+  };
   const evenStyleGetter = (event, start, end, isSelected) => {
     const style = {
       backgroundColor: "#367CF7",
@@ -65,11 +74,14 @@ export const CalendarScreen = () => {
           onSelectEvent={onSelectEvent}
           onView={onViewChange}
           view={lastView}
+          onSelectSlot={onSelectSlot}
+          selectable={true}
           components={{
             event: CalendarEvent,
           }}
         />
         <AddFab />
+        {activeEvent && <DeleteEventFab />}
         <CalendarModal />
       </div>
     </>
