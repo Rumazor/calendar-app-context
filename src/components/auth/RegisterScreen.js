@@ -1,19 +1,71 @@
-import React from "react";
+import React, { useContext } from "react";
 import { NavLink } from "react-router-dom";
+import { useForm } from "../../hooks/useForm";
+import Swal from "sweetalert2";
+import { AuthContext } from "../context/AuthContext";
+import { fetchSinToken } from "../helpers/fetch";
 
 export const RegisterScreen = () => {
+  const { authStateProvider } = useContext(AuthContext);
+  const { auth, setAuth } = authStateProvider;
+  const [formValues, handleInputChange] = useForm({
+    name: "Ruma",
+    email: "ruma@gmail.com",
+    password: "123456",
+    confirmPassword: "123456",
+  });
+
+  const { name, email, password, confirmPassword } = formValues;
+
+  const fetchRegister = async () => {
+    try {
+      const resp = await fetchSinToken(
+        "auth/new",
+        { name, email, password },
+        "POST"
+      );
+      const body = await resp.json();
+      if (body.ok) {
+        localStorage.setItem("token", body.token);
+        localStorage.setItem("token-init-date", new Date().getTime());
+        setAuth({
+          ...auth,
+          checking: false,
+          uid: body.uid,
+          name: body.name,
+        });
+        console.log(body);
+      } else {
+        Swal.fire("Error", body.msg, "error");
+      }
+    } catch (error) {
+      console.log(error);
+    }
+  };
+
+  const handleRegister = (e) => {
+    e.preventDefault();
+    if (password !== confirmPassword) {
+      return Swal.fire(
+        "Error",
+        "Las contraseñas deben de ser iguales",
+        "error"
+      );
+    }
+    fetchRegister();
+  };
+
   return (
     <>
       <div className=" min-h-screen bg-slate-800 grid place-content-center items-center">
-        <div className="w-full max-w-md min-w-[25.9375rem] p-8 space-y-4 rounded-xl dark:bg-gray-900 dark:text-gray-100">
+        <div className="w-full max-w-md min-w-[25.9375rem] animate__animated animate__fadeIn  p-8 space-y-4 rounded-xl dark:bg-gray-900 dark:text-gray-100">
           <h1 className="text-2xl font-bold text-center">Registro</h1>
           <form
-            noValidate=""
-            action=""
+            onSubmit={handleRegister}
             className="space-y-6 ng-untouched ng-pristine ng-valid"
           >
             <div className=" text-sm">
-              <label htmlFor="Nombre" className="block dark:text-gray-400">
+              <label htmlFor="Nombre" className="block dark:text-gray-400 pb-1">
                 Nombre
               </label>
               <input
@@ -21,12 +73,14 @@ export const RegisterScreen = () => {
                 name="name"
                 id="name"
                 autoComplete="off"
+                value={name}
+                onChange={handleInputChange}
                 placeholder="Ingresa tu nombre"
                 className="w-full px-4 py-2 rounded-md dark:border-gray-700 dark:bg-gray-900 dark:text-gray-100 focus:dark:border-violet-400"
               />
             </div>
             <div className="text-sm">
-              <label htmlFor="email" className="block dark:text-gray-400">
+              <label htmlFor="email" className="block dark:text-gray-400 pb-1">
                 Correo electronico
               </label>
               <input
@@ -34,19 +88,8 @@ export const RegisterScreen = () => {
                 name="email"
                 id="email"
                 autoComplete="off"
-                placeholder="Ingresa tu contraseña"
-                className="w-full px-4 py-2 rounded-md dark:border-gray-700 dark:bg-gray-900 dark:text-gray-100 focus:dark:border-violet-400"
-              />
-              <div className="flex justify-end text-xs dark:text-gray-400"></div>
-            </div>
-            <div className=" text-sm">
-              <label htmlFor="Contraseña" className="block dark:text-gray-400">
-                Contraseña
-              </label>
-              <input
-                type="password"
-                name="password"
-                id="password"
+                onChange={handleInputChange}
+                value={email}
                 placeholder="Ingresa tu contraseña"
                 className="w-full px-4 py-2 rounded-md dark:border-gray-700 dark:bg-gray-900 dark:text-gray-100 focus:dark:border-violet-400"
               />
@@ -54,8 +97,26 @@ export const RegisterScreen = () => {
             </div>
             <div className=" text-sm">
               <label
+                htmlFor="Contraseña"
+                className="block dark:text-gray-400  pb-1"
+              >
+                Contraseña
+              </label>
+              <input
+                type="password"
+                name="password"
+                id="password"
+                onChange={handleInputChange}
+                value={password}
+                placeholder="Ingresa tu contraseña"
+                className="w-full px-4 py-2 rounded-md dark:border-gray-700 dark:bg-gray-900 dark:text-gray-100 focus:dark:border-violet-400"
+              />
+              <div className="flex justify-end text-xs dark:text-gray-400 "></div>
+            </div>
+            <div className=" text-sm">
+              <label
                 htmlFor="confirmPassword"
-                className="block dark:text-gray-400"
+                className="block dark:text-gray-400  pb-1"
               >
                 Confirma tu contraseña
               </label>
@@ -63,6 +124,8 @@ export const RegisterScreen = () => {
                 type="password"
                 name="confirmPassword"
                 id="confirmPassword"
+                value={confirmPassword}
+                onChange={handleInputChange}
                 placeholder="Confirma tu contraseña"
                 className="w-full px-4 py-2 rounded-md dark:border-gray-700 dark:bg-gray-900 dark:text-gray-100 focus:dark:border-violet-400"
               />

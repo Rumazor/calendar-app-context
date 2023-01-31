@@ -1,10 +1,23 @@
-import React, { useState, useRef } from "react";
+import React, { useState, useRef, useContext } from "react";
 import { Transition } from "@headlessui/react";
-import { NavLink } from "react-router-dom";
+// import { NavLink } from "react-router-dom";
+
+import { AuthContext } from "../context/AuthContext";
 
 export function NavbarUI() {
+  const { authStateProvider } = useContext(AuthContext);
+  const { auth, setAuth } = authStateProvider;
   const [isOpen, setIsOpen] = useState(false);
   const ref = useRef();
+  const { name } = auth;
+
+  const startLogOut = () => {
+    localStorage.clear();
+    return setAuth({
+      checking: false,
+    });
+  };
+
   return (
     <div>
       <nav className="bg-gray-800">
@@ -20,18 +33,22 @@ export function NavbarUI() {
               </div>
               <div className="hidden md:block">
                 <div className="ml-10 flex items-baseline space-x-4">
-                  <NavLink
+                  {/* <NavLink
                     href="#"
                     className=" no-underline hover:no-underline hover:bg-gray-700 text-white px-3 py-2 rounded-md text-sm font-medium"
                   >
                     Dashboard
-                  </NavLink>
+                  </NavLink> */}
+                  <h2 className="text-white font-semibold text-lg">{name}</h2>
                 </div>
               </div>
             </div>
             <div className="hidden md:block">
               <div className="ml-10 flex items-baseline space-x-4">
-                <button className=" hover:bg-gray-700 text-white px-3 py-2 rounded-md text-sm font-medium">
+                <button
+                  onClick={startLogOut}
+                  className=" hover:bg-gray-700 text-white px-3 py-2 rounded-md text-sm font-medium"
+                >
                   Salir
                 </button>
               </div>
@@ -93,13 +110,16 @@ export function NavbarUI() {
           leaveTo="opacity-0 scale-95"
         >
           <div className="md:hidden" id="mobile-menu">
-            <div ref={ref} className="px-2 pt-2 pb-3 space-y-1 sm:px-3">
+            {/* <div ref={ref} className="px-2 pt-2 pb-3 space-y-1 sm:px-3">
               <button className="no-underline  hover:bg-gray-700 hover:no-underline text-white block px-3 py-2 rounded-md text-base font-medium">
                 Dashboard
               </button>
-            </div>
+            </div> */}
             <div ref={ref} className="px-2 pt-2 pb-3 space-y-1 sm:px-3">
-              <button className="w-full text-left hover:bg-gray-700 text-white block px-3 py-2 rounded-md text-base font-medium">
+              <button
+                onClick={startLogOut}
+                className="w-full text-left hover:bg-gray-700 text-white block px-3 py-2 rounded-md text-base font-medium"
+              >
                 Salir
               </button>
             </div>

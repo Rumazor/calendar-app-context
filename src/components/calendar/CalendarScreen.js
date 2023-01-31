@@ -1,4 +1,4 @@
-import React, { useState, useContext } from "react";
+import React, { useState, useContext, useEffect } from "react";
 import { Calendar, momentLocalizer } from "react-big-calendar";
 import moment from "moment";
 import "moment/locale/es";
@@ -10,13 +10,18 @@ import "react-big-calendar/lib/css/react-big-calendar.css";
 import { CalendarContext } from "../context/CalendarContext";
 import { AddFab } from "../ui/AddFab";
 import DeleteEventFab from "../ui/DeleteEventFab";
+import { fetchconToken } from "../helpers/fetch";
+import { stringToDateFunction } from "../helpers/stringToDate";
+import { AuthContext } from "../context/AuthContext";
+
 moment.locale("es");
 
 const localizer = momentLocalizer(moment);
 
 export const CalendarScreen = () => {
   const { providerModal, calendarStateProvider } = useContext(CalendarContext);
-
+  const { authStateProvider } = useContext(AuthContext);
+  const { auth } = authStateProvider;
   const { setModal, modal } = providerModal;
   const { setCalendarState, calendarState } = calendarStateProvider;
 
@@ -24,6 +29,21 @@ export const CalendarScreen = () => {
   const [lastView, setLastView] = useState(
     localStorage.getItem("lastView") || "month"
   );
+
+  const startLoadingEvent = async () => {
+    try {
+      const resp = await fetchconToken("events");
+      const body = await resp.json();
+      const events = stringToDateFunction(body.events);
+
+      setCalendarState({
+        ...calendarState,
+        events: [...events],
+      });
+    } catch (error) {
+      console.log(error);
+    }
+  };
 
   const onDobleClick = (e) => {
     setModal(!modal);
@@ -47,8 +67,10 @@ export const CalendarScreen = () => {
     });
   };
   const evenStyleGetter = (event, start, end, isSelected) => {
+    const { uid } = auth;
+
     const style = {
-      backgroundColor: "#367CF7",
+      backgroundColor: uid === event?.user?._id ? "#367CF7" : "#464660",
       borderRadius: "0px",
       opacity: 0.8,
       display: "block",
@@ -57,6 +79,9 @@ export const CalendarScreen = () => {
     return { style };
   };
 
+  useEffect(() => {
+    startLoadingEvent();
+  }, []);
   return (
     <>
       <div className=" min-h-screen  font-Roboto">

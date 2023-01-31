@@ -1,25 +1,23 @@
 import { createContext, useState, useMemo, useContext } from "react";
-import moment from "moment/moment";
 
 export const CalendarContext = createContext(null);
+
+// {
+//         id: asdasdasd,
+//         title: "Cumpleaños",
+//         start: moment().toDate(),
+//         end: moment().add(2, "hours").toDate(),
+//         notes: "comprar el pastel",
+//         user: {
+//           _id: "123",
+//           name: "Ruma",
+//         },
+//       },
 
 export const CalendarProvider = ({ children }) => {
   // Initial State
   const [calendarState, setCalendarState] = useState({
-    events: [
-      {
-        id: new Date().getTime(),
-        title: "Cumpleaños",
-        start: moment().toDate(),
-        end: moment().add(2, "hours").toDate(),
-        bgcolor: "#fafafa",
-        notes: "comprar el pastel",
-        user: {
-          _id: "123",
-          name: "Ruma",
-        },
-      },
-    ],
+    events: [],
     activeEvent: null,
   });
 
@@ -34,7 +32,6 @@ export const CalendarProvider = ({ children }) => {
 
   //Manage Actions
 
-  console.log(calendarState);
   const value = {
     providerModal,
     calendarStateProvider,

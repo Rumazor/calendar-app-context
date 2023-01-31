@@ -17,7 +17,6 @@ export const AuthProvider = ({ children }) => {
 
   //Start Login
 
-  console.log(auth);
   const value = {
     authStateProvider,
   };

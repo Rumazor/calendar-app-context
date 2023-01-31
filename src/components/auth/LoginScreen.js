@@ -9,24 +9,28 @@ export const LoginScreen = () => {
   const { authStateProvider } = useContext(AuthContext);
   const { auth, setAuth } = authStateProvider;
   const [formValues, handleInputChange] = useForm({
-    email: "ruma@gmail.com",
-    password: "123456",
+    email: "",
+    password: "",
   });
 
-  const fetchData = async () => {
-    const resp = await fetchSinToken("auth", { email, password }, "POST");
-    const body = await resp.json();
-    if (body.ok) {
-      localStorage.setItem("token", body.token);
-      localStorage.setItem("token-init-date", new Date().getTime());
-      setAuth({
-        ...auth,
-        checking: false,
-        uid: body.uid,
-        name: body.name,
-      });
-    } else {
-      Swal.fire("Error", body.msg, "error");
+  const fetchLogin = async () => {
+    try {
+      const resp = await fetchSinToken("auth", { email, password }, "POST");
+      const body = await resp.json();
+      if (body.ok) {
+        localStorage.setItem("token", body.token);
+        localStorage.setItem("token-init-date", new Date().getTime());
+        setAuth({
+          ...auth,
+          checking: false,
+          uid: body.uid,
+          name: body.name,
+        });
+      } else {
+        Swal.fire("Error", body.msg, "error");
+      }
+    } catch (error) {
+      console.log(error);
     }
   };
 
@@ -34,12 +38,12 @@ export const LoginScreen = () => {
 
   const handleLogin = (e) => {
     e.preventDefault();
-    fetchData();
+    fetchLogin();
   };
 
   return (
-    <div className=" min-h-screen bg-slate-800 grid place-content-center items-center">
-      <div className="w-full max-w-md min-h-[36.25rem] p-8 space-y-4 rounded-xl dark:bg-gray-900 dark:text-gray-100">
+    <div className=" min-h-screen bg-slate-800 grid place-content-center items-center   ">
+      <div className="w-full max-w-md min-h-[36.25rem] animate__animated animate__fadeIn  p-8 space-y-4 rounded-xl dark:bg-gray-900 dark:text-gray-100">
         <h1 className="text-2xl font-bold text-center">Ingresar</h1>
         <form
           onSubmit={handleLogin}

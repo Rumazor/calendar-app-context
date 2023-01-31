@@ -1,11 +1,13 @@
 import React, { useContext, useEffect, useState } from "react";
 import DateTimePicker from "react-datetime-picker";
 import { CalendarContext } from "../context/CalendarContext";
+import { fetchconToken } from "../helpers/fetch";
 import Modal from "react-modal";
 import moment from "moment/moment";
 import Swal from "sweetalert2";
 
 import "./modal.css";
+import { AuthContext } from "../context/AuthContext";
 
 Modal.setAppElement("#root");
 
@@ -25,7 +27,8 @@ export const CalendarModal = () => {
   const { providerModal, calendarStateProvider } = useContext(CalendarContext);
   const { modal, setModal } = providerModal;
   const { setCalendarState, calendarState } = calendarStateProvider;
-
+  const { authStateProvider } = useContext(AuthContext);
+  const { auth } = authStateProvider;
   const [formValues, setFormValues] = useState({
     ...initEvent,
   });
@@ -39,15 +42,10 @@ export const CalendarModal = () => {
     } else {
       setFormValues(initEvent);
     }
-  }, [activeEvent, setFormValues]);
+  }, [activeEvent, setFormValues, setCalendarState]);
 
   const newEvent = {
     ...formValues,
-    id: new Date().getTime(),
-    user: {
-      _id: "1234",
-      name: "Ruma",
-    },
   };
   const handleInputChange = ({ target }) => {
     setFormValues({
@@ -74,6 +72,57 @@ export const CalendarModal = () => {
     });
   };
 
+  const NewEventFetch = async () => {
+    const { name, uid } = auth;
+    try {
+      const resp = await fetchconToken("events", newEvent, "POST");
+      const body = await resp.json();
+
+      if (body.ok) {
+        newEvent.id = body.event.id;
+        newEvent.user = {
+          _id: uid,
+          name,
+        };
+        setCalendarState({
+          ...calendarState,
+          events: [...calendarState.events, newEvent],
+        });
+        Swal.fire("Nota creada", "Has creado una nueva nota", "success");
+      } else {
+        Swal.fire("Error", body.msg, "error");
+      }
+    } catch (error) {
+      console.log(error);
+    }
+  };
+
+  const newEventUpdateFetch = async (eventId) => {
+    try {
+      console.log(eventId);
+      const resp = await fetchconToken(`events/${eventId}`, newEvent, "PUT");
+      const body = await resp.json();
+      if (body.ok) {
+        const updatedEvents = calendarState.events.map((event) => {
+          if (event.id === eventId) {
+            return { ...event, ...formValues };
+          }
+          return event;
+        });
+        setCalendarState({ ...calendarState, events: updatedEvents });
+        Swal.fire(
+          "Nota actualizada",
+          "Has actualizado exitosamente la nota",
+          "success"
+        );
+      } else {
+        Swal.fire("Error", body.msg, "error");
+      }
+    } catch (error) {
+      console.log(error);
+    }
+  };
+
   const closeModal = () => {
     setModal(false);
     setFormValues(initEvent);
@@ -97,26 +146,10 @@ export const CalendarModal = () => {
 
     if (activeEvent) {
       const eventId = activeEvent.id;
-      const updatedEvents = calendarState.events.map((event) => {
-        if (event.id === eventId) {
-          return { ...event, ...formValues };
-        }
-        return event;
-      });
-      return (
-        setCalendarState({ ...calendarState, events: updatedEvents }),
-        setTitleValit(true),
-        closeModal()
-      );
+
+      return newEventUpdateFetch(eventId), setTitleValit(true), closeModal();
     } else {
-      return (
-        (setCalendarState({
-          ...calendarState,
-          events: [...calendarState.events, newEvent],
-        }),
-        setTitleValit(true)),
-        closeModal()
-      );
+      return NewEventFetch(), setTitleValit(true), closeModal();
     }
   };
 
