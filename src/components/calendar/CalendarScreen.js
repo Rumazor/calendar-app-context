@@ -60,7 +60,6 @@ export const CalendarScreen = () => {
   };
 
   const onSelectSlot = (e) => {
-    console.log(e);
     setCalendarState({
       ...calendarState,
       activeEvent: null,
