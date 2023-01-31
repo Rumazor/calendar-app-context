@@ -9,10 +9,10 @@ export const RegisterScreen = () => {
   const { authStateProvider } = useContext(AuthContext);
   const { auth, setAuth } = authStateProvider;
   const [formValues, handleInputChange] = useForm({
-    name: "Ruma",
-    email: "ruma@gmail.com",
-    password: "123456",
-    confirmPassword: "123456",
+    name: "",
+    email: "",
+    password: "",
+    confirmPassword: "",
   });
 
   const { name, email, password, confirmPassword } = formValues;
